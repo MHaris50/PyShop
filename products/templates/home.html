@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Landing Banner -->
+<div class="row align-items-center hero-section px-4 px-md-5">
+    <div class="col-lg-6">
+        <h1 class="hero-title">Fresh Fruits,<br>Delivered to Your <span>Home</span></h1>
+        <p class="hero-subtitle">PyShop is your digital organic grocery store. Experience nature's best harvest, sourced directly from local farms. Freshness, quality, and quick delivery guaranteed.</p>
+        <div class="d-flex flex-wrap gap-3">
+            <a href="{% url 'products_index' %}" class="btn btn-primary-custom btn-lg"><i class="bi bi-shop me-2"></i>Browse Catalog</a>
+            <a href="#exclusive-offers" class="btn btn-secondary-custom btn-lg"><i class="bi bi-tag me-2"></i>View Deals</a>
+        </div>
+    </div>
+    <div class="col-lg-6 text-center d-none d-lg-block">
+        <img src="https://media.istockphoto.com/id/1142119394/photo/whole-and-slices-watermelon-fruit-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=A5XnLyeI_3mwkCNadv-QLU4jzgNux8kUPfIlDvwT0jo=" 
+             class="img-fluid rounded-4 shadow-lg" style="max-height: 380px; object-fit: cover; border: 8px solid white;" alt="Fresh Watermelon Banner Image">
+    </div>
+</div>
+
+<!-- Trust & Feature Badges -->
+<div class="row g-4 mb-5 text-center">
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper mx-auto">
+                <i class="bi bi-shield-fill-check"></i>
+            </div>
+            <h4 class="fw-bold mb-2">100% Organic</h4>
+            <p class="text-muted mb-0">Sourced directly from local organic farms with no harmful preservatives or chemicals.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper mx-auto">
+                <i class="bi bi-truck-flatbed"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Express Delivery</h4>
+            <p class="text-muted mb-0">Get your fresh fruits delivered to your doorstep within 24 hours of harvest.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon-wrapper mx-auto">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Secure Payment</h4>
+            <p class="text-muted mb-0">Multiple payment methods supported. Shop with peace of mind.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Special Promos & Deals Section -->
+{% if offers %}
+<div class="mb-5" id="exclusive-offers">
+    <h2 class="offer-section-title text-center text-md-start"><i class="bi bi-fire text-danger me-2"></i>Exclusive Coupon Codes</h2>
+    <div class="row g-4">
+        {% for offer in offers %}
+        <div class="col-md-6 col-lg-6">
+            <div class="offer-card">
+                <div class="offer-discount">{% widthratio offer.discount 1 100 %}% OFF</div>
+                <h4 class="fw-bold text-white mb-2">{{ offer.description }}</h4>
+                <p class="text-white-50 small mb-3">Copy and apply this coupon at checkout to save big on your order today!</p>
+                <div class="offer-code" onclick="navigator.clipboard.writeText('{{ offer.code }}'); showToast('Coupon {{ offer.code }} copied to clipboard!')">
+                    <i class="bi bi-copy me-2"></i>{{ offer.code }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Featured Products Showcase -->
+{% if featured_products %}
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0"><i class="bi bi-stars text-warning me-2"></i>Featured Harvest</h2>
+        <a href="{% url 'products_index' %}" class="btn btn-link text-success fw-bold text-decoration-none">View All Catalog <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row g-4">
+        {% for product in featured_products %}
+        <div class="col-md-6 col-lg-4">
+            <div class="product-card">
+                <div class="product-img-wrapper">
+                    <span class="product-badge"><i class="bi bi-tag-fill me-1"></i>Featured</span>
+                    <img src="{{ product.image_url }}" class="product-img" alt="{{ product.name }}">
+                </div>
+                <div class="product-details">
+                    <h3 class="product-title">{{ product.name }}</h3>
+                    <div class="product-price">Rs.{{ product.price|floatformat:2 }}</div>
+                    <div class="product-stock">Stock: <span class="text-success">{{ product.stock }} items available</span></div>
+                    <button class="add-to-cart-btn" onclick="addToCart({{ product.id }}, '{{ product.name|escapejs }}', {{ product.price }}, '{{ product.image_url|escapejs }}', {{ product.stock }})">
+                        <i class="bi bi-cart-plus-fill"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

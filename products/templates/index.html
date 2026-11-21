@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="text-center py-4">
+    <h1 class="fw-bold mb-2">Our Fresh Harvest</h1>
+    <p class="text-muted mb-4">Explore our choice selection of fresh, locally grown fruits.</p>
+</div>
+
+<!-- Dynamic Search Bar -->
+<div class="search-container mb-5">
+    <i class="bi bi-search search-icon-inside"></i>
+    <input type="text" id="catalogSearch" class="search-input" placeholder="Search for fresh fruits (e.g. mango, watermelon)..." onkeyup="filterProducts()">
+</div>
+
+<div class="row g-4" id="productsGrid">
+    {% for product in products %}
+    <div class="col-md-6 col-lg-4 product-card-col" data-name="{{ product.name|lower }}">
+        <div class="product-card">
+            <div class="product-img-wrapper">
+                <img src="{{ product.image_url }}" class="product-img" alt="{{ product.name }}">
+            </div>
+            <div class="product-details">
+                <h3 class="product-title">{{ product.name }}</h3>
+                <div class="product-price">Rs.{{ product.price|floatformat:2 }}</div>
+                <div class="product-stock">Stock: <span class="text-success">{{ product.stock }} items available</span></div>
+                <button class="add-to-cart-btn" onclick="addToCart({{ product.id }}, '{{ product.name|escapejs }}', {{ product.price }}, '{{ product.image_url|escapejs }}', {{ product.stock }})">
+                    <i class="bi bi-cart-plus-fill"></i> Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Empty search state -->
+<div id="noResultsMessage" class="text-center py-5 text-muted" style="display: none;">
+    <i class="bi bi-search-heart fs-1 mb-3 d-block text-success opacity-50"></i>
+    No fruits found matching your search.
+</div>
+
+<script>
+    function filterProducts() {
+        const query = document.getElementById("catalogSearch").value.toLowerCase().trim();
+        const cols = document.querySelectorAll(".product-card-col");
+        let visibleCount = 0;
+
+        cols.forEach(col => {
+            const productName = col.getAttribute("data-name");
+            if (productName.includes(query)) {
+                col.style.display = "block";
+                visibleCount++;
+            } else {
+                col.style.display = "none";
+            }
+        });
+
+        const noResults = document.getElementById("noResultsMessage");
+        if (visibleCount === 0) {
+            noResults.style.display = "block";
+        } else {
+            noResults.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

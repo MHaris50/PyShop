@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PyShop - Fresh Fruits & Organic Produce</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom Style Sheet -->
+    {% load static %}
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<!-- Custom Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <a class="navbar-brand navbar-brand-custom" href="{% url 'home' %}">
+            <i class="bi bi-egg-fried"></i> Py<span>Shop</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom {% if request.resolver_match.url_name == 'products_index' %}active{% endif %}" href="{% url 'products_index' %}">Catalog</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center">
+                <!-- Cart Button -->
+                <button class="cart-icon-btn me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
+                    <i class="bi bi-bag-heart-fill fs-4"></i>
+                    <span id="cartCountBadge" class="cart-badge">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Body Content -->
+<div class="container min-vh-100 py-4">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<!-- Offcanvas Shopping Cart -->
+<div class="offcanvas offcanvas-end offcanvas-cart" tabindex="-1" id="offcanvasCart" aria-labelledby="offcanvasCartLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold" id="offcanvasCartLabel"><i class="bi bi-cart3 me-2 text-success"></i>Your Cart</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+        <!-- Scrollable list of items -->
+        <div id="cartItemsList" class="flex-grow-1 overflow-auto pe-2">
+            <!-- Dynamic elements will be inserted here -->
+            <div class="text-center py-5 text-muted" id="emptyCartMessage">
+                <i class="bi bi-basket fs-1 mb-3 d-block text-success opacity-50"></i>
+                Your shopping cart is empty
+            </div>
+        </div>
+        
+        <!-- Cart Summary and Checkout -->
+        <div id="cartCheckoutSummary" style="display: none;">
+            <div class="cart-summary">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal</span>
+                    <span id="cartSubtotal" class="fw-bold">Rs.0.00</span>
+                </div>
+                <!-- Promo Code -->
+                <div class="promo-input-group mt-3">
+                    <input type="text" id="promoCodeInput" class="form-control promo-input" placeholder="Promo Code (e.g. VC9904)" aria-label="Promo code">
+                    <button class="btn promo-btn" onclick="applyPromo()">Apply</button>
+                </div>
+                <div id="promoFeedback" class="small mb-2" style="display: none;"></div>
+                <div class="d-flex justify-content-between border-top pt-2 text-danger small" id="discountSummaryRow" style="display: none;">
+                    <span>Discount (<span id="discountPercentage">0</span>%)</span>
+                    <span id="cartDiscount">-Rs.0.00</span>
+                </div>
+                <div class="d-flex justify-content-between border-top pt-2 fs-5 fw-bold">
+                    <span>Total</span>
+                    <span id="cartTotal" class="text-success">Rs.0.00</span>
+                </div>
+            </div>
+            <button class="btn btn-primary-custom w-100 mt-3 py-2" onclick="checkout()"><i class="bi bi-credit-card me-2"></i>Checkout Now</button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Toast Message -->
+<div class="custom-toast" id="cartToast">
+    <i class="bi bi-check-circle-fill custom-toast-icon"></i>
+    <span id="cartToastMessage">Item added to cart!</span>
+</div>
+
+<!-- Footer -->
+<footer class="footer-custom">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-brand"><i class="bi bi-egg-fried text-success"></i> Py<span>Shop</span></div>
+                <p>Bringing fresh, premium, and organic fruits straight to your doorstep. Powered by Python & Django.</p>
+                <div class="d-flex gap-3 fs-5 mt-3">
+                    <a href="#" class="text-light"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-light"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-light"><i class="bi bi-twitter-x"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h5 class="text-white fw-bold mb-3">Links</h5>
+                <ul class="footer-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'products_index' %}">Catalog</a></li>
+                    <li><a href="#">Deals</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="text-white fw-bold mb-3">Support</h5>
+                <ul class="footer-links">
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Shipping Policy</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="text-white fw-bold mb-3">Newsletter</h5>
+                <p class="small">Subscribe to get notified about fresh arrivals and discount codes!</p>
+                <div class="input-group">
+                    <input type="email" class="form-control bg-dark border-secondary text-white" placeholder="Your Email" style="font-size: 0.9rem;">
+                    <button class="btn btn-success" type="button"><i class="bi bi-send"></i></button>
+                </div>
+            </div>
+        </div>
+        <hr class="border-secondary mt-5">
+        <div class="text-center text-secondary small py-2">
+            &copy; 2026 PyShop. All rights reserved. Made with Love & Fresh Fruits.
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Shopping Cart JavaScript Logic -->
+<script>
+    // Load offers dynamically from context
+    const ACTIVE_OFFERS = {
+        {% if offers %}
+            {% for offer in offers %}
+                "{{ offer.code }}": {
+                    discount: {{ offer.discount }},
+                    description: "{{ offer.description }}"
+                },
+            {% endfor %}
+        {% endif %}
+    };
+
+    let cart = [];
+    let appliedPromoCode = "";
+    let appliedDiscountRate = 0.0;
+
+    // Load cart on page load
+    document.addEventListener("DOMContentLoaded", () => {
+        const storedCart = localStorage.getItem("pyshop_cart");
+        if (storedCart) {
+            try {
+                cart = JSON.parse(storedCart);
+            } catch (e) {
+                cart = [];
+            }
+        }
+        updateCartUI();
+    });
+
+    function saveCart() {
+        localStorage.setItem("pyshop_cart", JSON.stringify(cart));
+    }
+
+    // Show custom toast notification
+    function showToast(message) {
+        const toast = document.getElementById("cartToast");
+        const msgEl = document.getElementById("cartToastMessage");
+        msgEl.innerText = message;
+        toast.classList.add("show");
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 2500);
+    }
+
+    // Add item to cart
+    function addToCart(id, name, price, imageUrl, maxStock) {
+        const existingItem = cart.find(item => item.id === id);
+        if (existingItem) {
+            if (existingItem.quantity < maxStock) {
+                existingItem.quantity += 1;
+                showToast(`Increased quantity of ${name}!`);
+            } else {
+                showToast(`Sorry, only ${maxStock} in stock!`);
+                return;
+            }
+        } else {
+            cart.push({
+                id: id,
+                name: name,
+                price: parseFloat(price),
+                imageUrl: imageUrl,
+                quantity: 1,
+                maxStock: parseInt(maxStock)
+            });
+            showToast(`${name} added to cart!`);
+        }
+        saveCart();
+        updateCartUI();
+    }
+
+    // Remove item completely
+    function removeFromCart(id) {
+        const item = cart.find(i => i.id === id);
+        const name = item ? item.name : "Item";
+        cart = cart.filter(item => item.id !== id);
+        saveCart();
+        updateCartUI();
+        showToast(`${name} removed from cart.`);
+    }
+
+    // Adjust quantity
+    function changeQuantity(id, delta, maxStock) {
+        const item = cart.find(item => item.id === id);
+        if (item) {
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                removeFromCart(id);
+                return;
+            } else if (item.quantity > maxStock) {
+                item.quantity = maxStock;
+                showToast(`Only ${maxStock} items available in stock.`);
+            }
+            saveCart();
+            updateCartUI();
+        }
+    }
+
+    // Apply Promo Code
+    function applyPromo() {
+        const promoInput = document.getElementById("promoCodeInput");
+        const code = promoInput.value.trim().toUpperCase();
+        const feedback = document.getElementById("promoFeedback");
+        
+        feedback.style.display = "block";
+        feedback.className = "small mt-1";
+
+        if (!code) {
+            feedback.innerText = "Please enter a coupon code.";
+            feedback.classList.add("text-danger");
+            return;
+        }
+
+        if (ACTIVE_OFFERS[code]) {
+            appliedPromoCode = code;
+            appliedDiscountRate = parseFloat(ACTIVE_OFFERS[code].discount);
+            feedback.innerText = `Success! Applied ${ACTIVE_OFFERS[code].description}`;
+            feedback.classList.remove("text-danger");
+            feedback.classList.add("text-success");
+            showToast(`Promo ${code} applied successfully!`);
+        } else {
+            feedback.innerText = "Invalid promo code.";
+            feedback.classList.add("text-danger");
+            feedback.classList.remove("text-success");
+        }
+        updateCartUI();
+    }
+
+    // Update Cart HTML and Summary
+    function updateCartUI() {
+        const badge = document.getElementById("cartCountBadge");
+        const listContainer = document.getElementById("cartItemsList");
+        const summaryContainer = document.getElementById("cartCheckoutSummary");
+        const emptyMsg = document.getElementById("emptyCartMessage");
+        
+        let totalItems = 0;
+        let subtotal = 0.0;
+        
+        listContainer.innerHTML = "";
+
+        if (cart.length === 0) {
+            badge.innerText = "0";
+            emptyMsg.style.display = "block";
+            listContainer.appendChild(emptyMsg);
+            summaryContainer.style.display = "none";
+            return;
+        }
+
+        emptyMsg.style.display = "none";
+        summaryContainer.style.display = "block";
+
+        cart.forEach(item => {
+            totalItems += item.quantity;
+            const itemTotal = item.price * item.quantity;
+            subtotal += itemTotal;
+
+            const cardHtml = `
+                <div class="cart-item">
+                    <img src="${item.imageUrl}" class="cart-item-img" alt="${item.name}">
+                    <div class="cart-item-details">
+                        <div class="cart-item-title">${item.name}</div>
+                        <div class="cart-item-price">Rs.${item.price.toFixed(2)}</div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div class="cart-quantity-controls">
+                                <button class="cart-quantity-btn" onclick="changeQuantity(${item.id}, -1, ${item.maxStock})">-</button>
+                                <span class="cart-quantity-val">${item.quantity}</span>
+                                <button class="cart-quantity-btn" onclick="changeQuantity(${item.id}, 1, ${item.maxStock})">+</button>
+                            </div>
+                            <button class="remove-cart-item" onclick="removeFromCart(${item.id})">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            listContainer.insertAdjacentHTML('beforeend', cardHtml);
+        });
+
+        badge.innerText = totalItems;
+        document.getElementById("cartSubtotal").innerText = `Rs.${subtotal.toFixed(2)}`;
+
+        // Calculations
+        let discountVal = 0.0;
+        if (appliedPromoCode && appliedDiscountRate > 0) {
+            discountVal = subtotal * appliedDiscountRate;
+            document.getElementById("discountPercentage").innerText = Math.round(appliedDiscountRate * 100);
+            document.getElementById("cartDiscount").innerText = `-Rs.${discountVal.toFixed(2)}`;
+            document.getElementById("discountSummaryRow").style.display = "flex";
+        } else {
+            document.getElementById("discountSummaryRow").style.display = "none";
+        }
+
+        const finalTotal = subtotal - discountVal;
+        document.getElementById("cartTotal").innerText = `Rs.${finalTotal.toFixed(2)}`;
+    }
+
+    // Checkout Action
+    function checkout() {
+        if (cart.length === 0) return;
+        
+        // Show success alert
+        const finalPrice = document.getElementById("cartTotal").innerText;
+        alert(`Order Placed Successfully!\n\nTotal Paid: ${finalPrice}\nThank you for shopping at PyShop!`);
+        
+        // Reset everything
+        cart = [];
+        appliedPromoCode = "";
+        appliedDiscountRate = 0.0;
+        saveCart();
+        updateCartUI();
+        
+        // Reset input fields
+        document.getElementById("promoCodeInput").value = "";
+        document.getElementById("promoFeedback").style.display = "none";
+        
+        // Close Offcanvas
+        const offcanvasElement = document.getElementById('offcanvasCart');
+        const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+        if (offcanvas) {
+            offcanvas.hide();
+        }
+    }
+</script>
+</body>
+</html>
